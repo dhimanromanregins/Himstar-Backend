@@ -81,8 +81,8 @@ class Participant(models.Model):
     video = models.FileField(upload_to='competition_videos/')
     is_qualified_for_next_round = models.BooleanField(default=False)  # For tracking elimination
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.user
 
 class Round(models.Model):
     competition = models.ForeignKey(Competition, related_name="rounds", on_delete=models.CASCADE)
