@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'accounts',
     'banners',
     'contact',
+    'dashboard',
+    'video',
 ]
 
 MIDDLEWARE = [

@@ -1,4 +1,5 @@
 from django.db import models
+from dashboard.models import Category
 
 class BannerOrVideo(models.Model):
     BANNER = 'banner'
@@ -11,6 +12,7 @@ class BannerOrVideo(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     media_type = models.CharField(
         max_length=10,
         choices=MEDIA_TYPE_CHOICES,

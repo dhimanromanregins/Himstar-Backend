@@ -25,3 +25,6 @@ class OTP(models.Model):
 
     def is_expired(self):
         return (datetime.datetime.now(datetime.timezone.utc) - self.created_at).seconds > 300
+
+
+

@@ -1,0 +1,72 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+.pyenv/
+pip-wheel-metadata/
+
+# Python-specific log files
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Environment files
+.env
+.env.*
+.venv
+
+# PyCharm project settings
+.idea/
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# pytest
+.cache/
+
+# Django stuff:
+*.sqlite3
+media/
+staticfiles/
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# macOS system files
+.DS_Store
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+
