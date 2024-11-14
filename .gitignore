@@ -1,72 +1,53 @@
-# Python cache files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-venv/
-env/
-.venv/
-.pyenv/
-pip-wheel-metadata/
-
-# Python-specific log files
-*.log
-*.pot
+# Python
 *.pyc
 *.pyo
 *.pyd
-*.db
+__pycache__
+db.sqlite3
+*.sqlite3
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
+# Django
+*.log
+local_settings.py
 
-# Environment files
-.env
-.env.*
-.venv
+# Virtual environment
+env/
+venv/
+.venv/
 
-# PyCharm project settings
+# PyCharm
 .idea/
 
-# Byte-compiled / optimized / DLL files
-*.py[cod]
-*$py.class
+# VSCode
+.vscode/
 
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-
-# pytest
-.cache/
-
-# Django stuff:
-*.sqlite3
-media/
-staticfiles/
-db.sqlite3
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# macOS system files
+# MacOS
 .DS_Store
 
-# MyPy
-.mypy_cache/
-.dmypy.json
+# Windows
+Thumbs.db
 
+# Linux
+*~
+
+# pytest
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# mypy
+.mypy_cache/
+
+# Docker
+*.dockerignore
+.docker/
+
+# Celery
+celerybeat-schedule
+
+# Sphinx
+docs/_build/
+
+# PyInstaller
+*.spec
