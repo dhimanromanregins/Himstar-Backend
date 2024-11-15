@@ -142,7 +142,7 @@ class ParticipantDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            participant = Participant.objects.get(pk=pk)
+            participant = Participant.objects.get(user=pk)
         except Participant.DoesNotExist:
             return Response({'detail': 'Participant not found.'}, status=status.HTTP_404_NOT_FOUND)
 

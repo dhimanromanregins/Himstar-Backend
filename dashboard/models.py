@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import Register
 from django.utils import timezone
 from datetime import datetime, timedelta
+from ckeditor.fields import RichTextField
 
 
 
@@ -24,6 +25,25 @@ class Category(models.Model):
         return self.name
 
 
+
+class Tournament(models.Model):
+    name = models.CharField(max_length=255)
+    total_rounds = models.PositiveIntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    registration_open_date = models.DateField()
+    registration_close_date = models.DateField()
+    max_participants = models.PositiveIntegerField(null=True, blank=True)
+    banner_image = models.ImageField(upload_to='tournament_banners/', blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    rules = RichTextField()
+    price = models.BigIntegerField()
+    is_active = models.BooleanField(default=True)
+    is_online = models.BooleanField(default=False)
+    def __str__(self):
+        return f"Tournament: {self.name}"
+
+
 class Competition(models.Model):
     TOURNAMENT = 'tournament'
     COMPETITION = 'competition'
@@ -32,7 +52,7 @@ class Competition(models.Model):
         (TOURNAMENT, 'Tournament'),
         (COMPETITION, 'Competition'),
     ]
-
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     start_date = models.DateField()
@@ -51,7 +71,7 @@ class Competition(models.Model):
     is_active = models.BooleanField(default=True)
     is_online = models.BooleanField(default=False)
     banner_image = models.ImageField(upload_to='competition_banners/', blank=True, null=True)
-    rules = models.TextField(blank=True, null=True)
+    rules = RichTextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -105,23 +125,7 @@ class Round(models.Model):
             participant.is_qualified_for_next_round = False
             participant.save()
 
-class Tournament(models.Model):
-    tournament = models.OneToOneField(Competition, related_name='tournament', on_delete=models.CASCADE, limit_choices_to={'competition_type': 'tournament'})
-    total_rounds = models.PositiveIntegerField()
 
-    def __str__(self):
-        return f"Tournament: {self.tournament.name}"
-
-    def start_next_round(self):
-        current_round_number = self.tournament.rounds.count() + 1
-        new_round = Round.objects.create(
-            competition=self.tournament,
-            round_number=current_round_number,
-            start_date=timezone.now(),
-            end_date=timezone.now() + timedelta(days=7),
-            max_participants=(self.tournament.max_participants * 80) // 100  # For example, if 20% are eliminated
-        )
-        new_round.eliminate_participants()
 
 
 class CompetitionMedia(models.Model):

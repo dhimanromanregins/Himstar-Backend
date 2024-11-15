@@ -9,6 +9,7 @@ def generate_otp():
 # Function to send OTP via email
 def send_otp(email, otp):
     subject = "Your OTP for Registration"
+    print(otp, '==================')
     message = f"Your OTP for registration is {otp}. Please use this to complete your registration."
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email]

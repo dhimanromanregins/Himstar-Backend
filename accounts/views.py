@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer, OTPVerifySerializer,LoginSerializer
+from .models import Register
 
 # View to handle registration and sending OTP
 class RegisterView(APIView):
@@ -34,11 +35,13 @@ class LoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data
             tokens = serializer.get_tokens(user)
+            register = Register.objects.filter(user__id=user.id).first()
             return Response({
                 "status":status.HTTP_200_OK,
                 'refresh': tokens['refresh'],
                 'access': tokens['access'],
                 'user_id': user.id,
+                'reg_user_id': register.id,
                 'username': user.username,
                 'email': user.email,
             })

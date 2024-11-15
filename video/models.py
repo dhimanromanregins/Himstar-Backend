@@ -2,18 +2,21 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from dashboard.models import Competition
 from accounts.models import Register
+import uuid
 User = get_user_model()
+
+
+def generate_video_filename(instance, filename):
+    extension = filename.split('.')[-1]
+    return f"videos/{uuid.uuid4()}.{extension}"
 
 class Post(models.Model):
     """Model for user posts, with support for video uploads."""
     user = models.ForeignKey(Register, on_delete=models.CASCADE, related_name='posts')
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name='competition')
     caption = models.TextField(blank=True, null=True)
-    video = models.FileField(upload_to='videos/', blank=True, null=True)
+    video = models.FileField(upload_to=generate_video_filename, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Post by {self.user.username} at {self.created_at}"
 
     def total_likes(self):
         return self.likes.count()
@@ -32,7 +35,7 @@ class Like(models.Model):
         unique_together = ('user', 'post')  # A user can like a post only once.
 
     def __str__(self):
-        return f"{self.user.username} likes {self.post}"
+        return f"{self.user.user.username} likes {self.post}"
 
 
 class Comment(models.Model):
@@ -43,7 +46,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.post}"
+        return f"Comment by {self.user.user.username} on {self.post}"
 
 
 class Favorite(models.Model):
@@ -56,7 +59,7 @@ class Favorite(models.Model):
         unique_together = ('user', 'post')  # A user can favorite a post only once.
 
     def __str__(self):
-        return f"{self.user.username} favorited {self.post}"
+        return f"{self.user.user.username} favorited {self.post}"
 
 
 class Share(models.Model):
@@ -67,4 +70,4 @@ class Share(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} shared {self.post} with URL {self.share_url}"
+        return f"{self.user.user.username} shared {self.post} with URL {self.share_url}"

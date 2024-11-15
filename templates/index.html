@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Coming Soon</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body,
+      html {
+        height: 100%;
+        font-family: "Arial", sans-serif;
+      }
+
+      .coming-soon-container {
+        position: relative;
+        height: 100vh;
+        background-color: black; /* Black background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-align: center;
+        overflow: hidden;
+        font-weight: bold; /* Makes the text bold for better contrast */
+      }
+
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(
+          0,
+          0,
+          0,
+          0.7
+        ); /* Darker overlay for better text visibility */
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .logo {
+        width: 150px; /* Adjust the size of your logo */
+        height: auto;
+        border-radius: 5px;
+        margin-bottom: 30px; /* Space between logo and title */
+        animation: fadeInGlow 2s ease-out;
+      }
+
+      h1 {
+        font-size: 4em;
+        margin-bottom: 20px;
+        animation: fadeInGlow 2s ease-out;
+        color: #fff;
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff00ff, 0 0 30px #ff00ff,
+          0 0 40px #ff00ff, 0 0 50px #ff00ff; /* Glowing effect */
+      }
+
+      p {
+        font-size: 1.5em;
+        margin-bottom: 40px;
+        animation: fadeInGlow 2s ease-out;
+        animation-delay: 0.5s;
+        color: #fff;
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+      }
+
+      .countdown {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .countdown div {
+        font-size: 2.5em;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        animation: fadeInGlow 2s ease-out;
+        animation-delay: 1s;
+        color: #fff;
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff00ff;
+      }
+
+      @keyframes fadeInGlow {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #days,
+      #hours,
+      #minutes,
+      #seconds {
+        animation-duration: 1.5s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="coming-soon-container">
+      <div class="overlay"></div>
+      <div class="content">
+        <img
+          src="https://bucket-ygse15.s3.ap-south-1.amazonaws.com/logos/logo.png"
+          alt="Logo"
+          class="logo"
+        />
+        <h1>Coming Soon</h1>
+        <p>We're working hard to bring you something amazing. Stay tuned!</p>
+        <div class="countdown">
+          <div id="days"></div>
+          <div id="hours"></div>
+          <div id="minutes"></div>
+          <div id="seconds"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Set the date we're counting down to
+      const countDownDate = new Date("Dec 31, 2024 23:59:59").getTime();
+
+      // Update the countdown every 1 second
+      const countdown = setInterval(function () {
+        // Get the current date and time
+        const now = new Date().getTime();
+
+        // Find the distance between now and the count down date
+        const distance = countDownDate - now;
+
+        // Time calculations for days, hours, minutes, and seconds
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Display the result in the elements with the corresponding IDs
+        document.getElementById("days").innerHTML = `${days}d`;
+        document.getElementById("hours").innerHTML = `${hours}h`;
+        document.getElementById("minutes").innerHTML = `${minutes}m`;
+        document.getElementById("seconds").innerHTML = `${seconds}s`;
+
+        // If the countdown is finished, write some text
+        if (distance < 0) {
+          clearInterval(countdown);
+          document.getElementById("days").innerHTML = "EXPIRED";
+          document.getElementById("hours").innerHTML = "";
+          document.getElementById("minutes").innerHTML = "";
+          document.getElementById("seconds").innerHTML = "";
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

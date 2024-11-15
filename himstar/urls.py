@@ -18,11 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import main
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),
-    path('', include('banners.urls')),
-    path('', include('dashboard.urls')),
-    path('', include('video.urls'))
+    path('', main, name='main'),
+    path('api/', include('accounts.urls')),
+    path('api/', include('banners.urls')),
+    path('api/', include('dashboard.urls')),
+    path('api/', include('video.urls')),
+    path('api/', include('levels.urls')),
+    path('api/', include('payments.urls'))
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+
