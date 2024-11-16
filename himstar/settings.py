@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from .storages import S3StaticStorage, S3MediaStorage
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,19 +146,29 @@ STATIC_URL = 'static/'
 # Media files settings for S3
 # MEDIA_URL = 'https://%s.s3.amazonaws.com/' % os.getenv('AWS_STORAGE_BUCKET_NAME')
 # MEDIA_ROOT = ''
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 
 # AWS S3 settings for media files
-AWS_ACCESS_KEY_ID = 'AKIAYS2NVGIVL6Q3JC2E'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'bucket-ygse15'
-AWS_S3_REGION_NAME = 'ap-south-1'
-AWS_S3_ENDPOINT_URL = 'https://%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+# Static and Media files stored in S3
+AWS_ACCESS_KEY_ID = 'AKIAZI2LC6I47KFGTHPJ'  # Your AWS Access Key
+AWS_SECRET_ACCESS_KEY = 'VpZDbQnX6/OeZY2UyWQ0YU7/4WNXQf5SLS8uF0H4'  # Your AWS Secret Key
+AWS_STORAGE_BUCKET_NAME = 'himstar'
+AWS_S3_REGION_NAME = 'us-east-2'
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# Static files (CSS, JavaScript, images)
+# STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+
+# Media files (uploads)
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3MediaStorage'
+
 
 
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
