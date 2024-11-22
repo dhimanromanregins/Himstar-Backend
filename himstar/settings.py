@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-l)8p-)k^)6bn&5+@o9=)lfvltck6sm!3-u&q+32uw*v78hq*)g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.233.129.63']
+ALLOWED_HOSTS = ['13.233.129.63', '13.202.204.222', 'himstars.com']
 
 
 # Application definition
@@ -142,11 +142,13 @@ USE_I18N = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_URL = 'static/'
+# Directory where collectstatic will collect static files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# Media files settings for S3
-# MEDIA_URL = 'https://%s.s3.amazonaws.com/' % os.getenv('AWS_STORAGE_BUCKET_NAME')
-# MEDIA_ROOT = ''
-MEDIA_URL = 'media/'
+# Additional directories where Django will search for static files
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'static'),
+#]
 
 # AWS S3 settings for media files
 # Static and Media files stored in S3
