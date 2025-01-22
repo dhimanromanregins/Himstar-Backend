@@ -120,15 +120,15 @@ class UserVideosAPIView(APIView):
 class PostShuffledListAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        try:
+        # try:
             value = request.query_params.get('value')
             split_value = value.split('-')
             if split_value[0] == "COMP":
                 competition_id = int(split_value[1])
-                participants_video = Participant.objects.filter(competition=competition_id,competition__start_date__lte=today,competition__end_date__gte=today).exclude(video__isnull=True).exclude(video__exact=''.order_by('?'))
+                participants_video = Participant.objects.filter(competition=competition_id,competition__start_date__lte=today,competition__end_date__gte=today).exclude(video__isnull=True).exclude(video__exact='').order_by('?')
             elif split_value[0] == "TOUR":
                 tournament_id = split_value[1]
-                participants_video = Participant.objects.filter(tournament=tournament_id,competition__start_date__lte=today,competition__end_date__gte=today).exclude(video__isnull=True).exclude(video__exact=''.order_by('?'))
+                participants_video = Participant.objects.filter(tournament=tournament_id,competition__start_date__lte=today,competition__end_date__gte=today).exclude(video__isnull=True).exclude(video__exact='').order_by('?')
             elif split_value[0] == "ALL":
                 participants_video = Participant.objects.filter(
                     competition__isnull=False,
@@ -148,9 +148,9 @@ class PostShuffledListAPIView(APIView):
             serializer = ParticipantSerializer(participants_video, many=True, context={'user_id': request.user.id})
             print(serializer.data, '---------------------------')
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as err:
-            print('Error:', err)
-            return Response({"detail": "An error occurred while fetching the participants."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as err:
+        #     print('Error:', err)
+        #     return Response({"detail": "An error occurred while fetching the participants."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LikeAPIView(APIView):
