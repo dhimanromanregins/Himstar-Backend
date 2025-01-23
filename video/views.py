@@ -21,8 +21,9 @@ from django.shortcuts import get_object_or_404
 from accounts.models import Register
 from rest_framework.permissions import IsAuthenticated
 from dashboard.models import Competition
+from django.utils.timezone import now
 
-today = date.today()
+today = now()
 class ParticipantListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
