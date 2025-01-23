@@ -283,10 +283,11 @@ class TournamentsByCategoryView(APIView):
     def get(self, request):
         user_id = request.user.id
         category_id = request.GET.get('category_id')
+        print('now().date()>>>', now().date())
         tournaments = Tournament.objects.filter(
             is_active=True,
-            registration_open_date__lte=now().date(),
-            registration_close_date__gte=now().date(),
+            registration_open_date__lte=now(),
+            registration_close_date__gte=now(),
         )
         print(tournaments, '999999999999999999999')
         if category_id:
