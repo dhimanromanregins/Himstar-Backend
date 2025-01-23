@@ -304,7 +304,7 @@ class LeaderBoard(APIView):
         competition = get_object_or_404(Competition, id=competition_id)
 
         # Get participants with likes count
-        participants = Participant.objects.filter(competition=competition).annotate(
+        participants = Participant.objects.filter(competition=competition).exclude(video='').annotate(
             likes_count=Count('likes')
         ).order_by('-likes_count')
 
@@ -343,6 +343,7 @@ class ParticularCompetition(APIView):
             else:
                 tournaments_with_competition = Tournament.objects.filter(competitions__id=id).first()
                 competition = Tournament.objects.filter(id=id).first()
+            print("------------------------",competition)
 
             if not competition:
                 return Response(status=status.HTTP_404_NOT_FOUND)
@@ -391,7 +392,7 @@ class PastEventsView(APIView):
     def get(self, request, format=None):
         now = timezone.now()
         past_tournaments = Tournament.objects.filter(end_date__lt=now)
-        past_competitions = Competition.objects.filter(end_date__lt=now)
+        past_competitions = Competition.objects.filter(end_date__lt=now, competition_type='competition')
         tournament_serializer = TournamentSerializer(past_tournaments, many=True)
         competition_serializer = CompetitionSerializer(past_competitions, many=True)
         response_data = {

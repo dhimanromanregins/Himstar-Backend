@@ -116,10 +116,13 @@ class TournamentSerializer(serializers.ModelSerializer):
         user_id = self.context.get('user_id')
         register = Register.objects.filter(user=user_id).first()
         # current_competition = instance.competitions.filter(is_active=True).first()
+        current_time = timezone.localtime(timezone.now())
+
         current_competition = instance.competitions.filter(
             is_active=True,
-            end_date__lte=timezone.now()
+            end_date__gte=current_time
         ).first()
+        print('T', instance.name, 'Comp', current_competition.name, 'SD', current_competition.registration_open_date, 'ED', current_competition.registration_close_date)
         is_participated = Participant.objects.filter(competition=current_competition, user=register).first()
         participants = Participant.objects.filter(competition=current_competition)
         current_competition_serailzer = CompetitionSerializer(current_competition)
@@ -147,7 +150,10 @@ class TournamentSerializer(serializers.ModelSerializer):
             representation['temp_video'] = is_participated.temp_video.url
         representation['is_close'] = instance.end_date < now()
         representation['is_done'] = True if is_participated and ((is_participated.file_uri or (is_participated.video and 'media' in is_participated.video.url)) and is_participated.is_paid) else False
-        representation['reg_open'] = current_competition.registration_open_date <= now() and current_competition.registration_close_date >= now()
+
+
+        representation['reg_open'] = current_competition.registration_open_date <= current_time and current_competition.registration_close_date >= current_time
+
         representation['reg_close'] = current_competition.registration_close_date < now()
         representation['remaining_slots'] = instance.max_participants - participants.count()
         representation['is_paid'] = True if payment else False
