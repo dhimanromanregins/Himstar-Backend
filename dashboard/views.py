@@ -190,7 +190,6 @@ class StartedCompetitionsView(APIView):
             end_date__gte=now(),
             competition_type='competition',
         )
-
         # If category_id is provided, filter by category
         if category_id:
             category = get_object_or_404(Category, id=category_id)
@@ -200,8 +199,6 @@ class StartedCompetitionsView(APIView):
         competitions_serializer = CompetitionSerializer(
             competitions, many=True, context={'user_id': user_id}
         )
-
-        print(competitions_serializer.data, '9999999999999999999999')
         # Return the response with ongoing competitions
         return Response({'competitions': competitions_serializer.data}, status=status.HTTP_200_OK)
 
@@ -343,7 +340,11 @@ class ParticularCompetition(APIView):
                 competition = Tournament.objects.filter(unique_id=id).first()
             else:
                 tournaments_with_competition = Tournament.objects.filter(competitions__id=id).first()
-                competition = Tournament.objects.filter(id=id).first()
+                try:
+                    competition = Tournament.objects.filter(id=tournaments_with_competition.id).first()
+                except:
+                    competition = Tournament.objects.filter(id=id).first()
+
             print("------------------------",competition)
 
             if not competition:
@@ -393,8 +394,9 @@ class PastEventsView(APIView):
     def get(self, request, format=None):
         now = timezone.now()
         past_tournaments = Tournament.objects.filter(end_date__lt=now)
+        print(past_tournaments, '================')
         past_competitions = Competition.objects.filter(end_date__lt=now, competition_type='competition')
-        tournament_serializer = TournamentSerializer(past_tournaments, many=True)
+        tournament_serializer = TournamentSerializer(past_tournaments, many=True, context={'past_tournaments':True})
         competition_serializer = CompetitionSerializer(past_competitions, many=True)
         response_data = {
             'past_tournaments': tournament_serializer.data,

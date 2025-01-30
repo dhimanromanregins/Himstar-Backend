@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'jazzmin',
+    'django_celery_beat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -162,6 +163,12 @@ EMAIL_HOST_PASSWORD = "tevz dzxm xemy bpob"  # Your email password (make sure to
 # AWS_S3_FILE_OVERWRITE = False  # Avoid overwriting files with the same name
 # AWS_DEFAULT_ACL = None  # Set to None to prevent public access; adjust based on your needs
 
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TIMEZONE = 'UTC'
 
 
 SIMPLE_JWT = {
