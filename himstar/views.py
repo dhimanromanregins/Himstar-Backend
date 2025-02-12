@@ -21,4 +21,4 @@ def terms_page(request):
 
 
 def withdraw_page(request):
-    return render(request, 'withdraw.html')
+    return render(request, 'withdrawl.html')
