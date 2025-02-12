@@ -68,7 +68,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return validated_data
     
     def get_eligible_awards(self, obj):
-        eligible_awards = Awards.objects.filter(votes_required__lte=obj.votes)
+        eligible_awards = Awards.objects.filter(votes_required__gte=50)
         return AwardsSerializer(eligible_awards, many=True).data
 
     def to_representation(self, instance):
@@ -76,8 +76,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         user_id = self.context.get('user_id')
         videos_id = Participant.objects.filter(user=user_id).values_list('id', flat=True)
         likes = Like.objects.filter(post__id__in=videos_id).count()
-        print('likes>>>>', likes)
         representation['total_likes'] = likes
+        representation['profile_image'] = instance.profile_image_url
+        representation['cover_image'] = instance.cover_image_url
+        print('representation>>>', representation)
+        # awards = Awards.objects.all()
+        # my_awards = []
+        # for award in awards:
+        #     if int(award.votes_required) <= 50:
+        #         my_awards.append(award.image_uri)
+        # representation['awards'] = my_awards
         return representation
     
 
@@ -201,7 +209,7 @@ class LoginSerializer(serializers.Serializer):
 class AwardsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Awards
-        fields = ['name', 'image', 'votes_required']
+        fields = ['name', 'image', 'votes_required', 'image_uri']
 
 class ReferralHistorySerializer(serializers.ModelSerializer):
     inviter = serializers.StringRelatedField()  # Assuming 'inviter' is a User instance

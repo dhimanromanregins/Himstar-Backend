@@ -13,14 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
-# from .storages import S3StaticStorage, S3MediaStorage
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-l)8p-)k^)6bn&5+@o9=)lfvltck6sm!3-u&q+32uw*v78hq*)g'
@@ -32,7 +27,6 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'jazzmin',
     'django_celery_beat',
@@ -100,6 +94,23 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'HimstarDB',
+#         'PASSWORD': 'Database@2025',
+#         'HOST': 'himstardbserver.postgres.database.azure.com',
+#         'PORT': '5432',
+#         # 'OPTIONS': {
+#         #     'sslmode': 'require',
+#         # }
+#     }
+# }
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -119,7 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CKEDITOR_CONFIGS = {
     'default': {
-        'toolbar': 'full',  # Options: 'basic', 'full', or custom configuration
+        'toolbar': 'full',
         'height': 300,
         'width': '100%',
     },
@@ -140,8 +151,6 @@ USE_I18N = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_URL = 'static/'
 
-# Media files settings for S3
-# MEDIA_URL = 'https://%s.s3.amazonaws.com/' % os.getenv('AWS_STORAGE_BUCKET_NAME')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Absolute path to media folder
 MEDIA_URL = '/media/'
 
@@ -156,12 +165,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "dhimansahil.ameotech@gmail.com"  # Your email
-EMAIL_HOST_PASSWORD = "tevz dzxm xemy bpob"  # Your email password (make sure to secure this)
-
-# # Additional AWS settings (optional)
-# AWS_S3_FILE_OVERWRITE = False  # Avoid overwriting files with the same name
-# AWS_DEFAULT_ACL = None  # Set to None to prevent public access; adjust based on your needs
+EMAIL_HOST_USER = "dhimansahil.ameotech@gmail.com"
+EMAIL_HOST_PASSWORD = "tevz dzxm xemy bpob"
 
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -170,6 +175,15 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = 'UTC'
 
+
+# Azure Details
+AZURE_ACCOUNT_NAME = "himstarstorage"
+AZURE_CONTAINER = "himstarmedia"
+AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=himstarstorage;AccountKey=VrLZLMLKBwLcJxzB89RKJR973RNt9F8Bv3Z2WPWYjkoG/6mLkkUbQrWjMWXX78ae5enZjp2pZcek+ASt+Srxow==;EndpointSuffix=core.windows.net"
+
+# DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+AZURE_CUSTOM_DOMAIN = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}"
+AZURE_FRONT_DOOR_DOMAIN = 'https://himstarvideos-b3ezdxefhcenf2ad.z01.azurefd.net/' + AZURE_CONTAINER
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),

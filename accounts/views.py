@@ -115,7 +115,7 @@ class LoginView(APIView):
                 'email': user.email,
                 'phone': register.phonenumber,
                 'name': f'{user.first_name} {user.last_name}',
-                'profile_image': register.profile_image.url if register.profile_image else None,
+                'profile_image': register.profile_image_url,
             })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -186,7 +186,7 @@ class GoogleLoginView(APIView):
             'email': user.email,
             'phone': register.phonenumber,
             'name': f'{user.first_name} {user.last_name}',
-            'profile_image': register.profile_image.url if register.profile_image else None,
+            'profile_image': register.profile_image_url,
         })
 
 class ReferralHistoryView(APIView):

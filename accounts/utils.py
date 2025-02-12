@@ -32,3 +32,6 @@ def verify_google_token(token):
         return id_info
     except ValueError:
         raise Exception("Invalid token")
+    except Exception as er:
+        print('Error:', er)
+        raise Exception("Invalid token")

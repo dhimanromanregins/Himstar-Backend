@@ -59,18 +59,18 @@ class CompetitionSerializer(serializers.ModelSerializer):
         representation['rules'] = instance.rules.split('\n') if instance.rules else instance.rules
         representation['is_participated'] = True if is_participated else False
         if is_participated and is_participated.temp_video:
-            representation['temp_video'] = is_participated.temp_video.url
+            representation['temp_video'] = is_participated.file_uri
         representation['stage'] = instance.stage.name.name if instance.stage else None
         if instance.competition_type == 'competition':
             representation['is_close'] = instance.end_date < now()
-        representation['is_done'] = True if is_participated and (is_participated.file_uri or (is_participated.video and 'media' in is_participated.video.url)) else False
+        representation['is_done'] = True if is_participated and (is_participated.file_uri and is_participated.is_paid) else False
         if instance.competition_type == 'competition':
             representation['reg_open'] = instance.registration_open_date <= now() and instance.registration_close_date >= now()
             representation['reg_close'] = instance.registration_close_date < now()
         else:
             representation['reg_open'] = None
             representation['reg_close'] = None
-        representation['remaining_slots'] = instance.max_participants - participants.count() if instance.max_participants else 0
+        representation['remaining_slots'] = instance.max_participants - participants.filter(is_paid=True).count() if instance.max_participants else 0
         representation['registration_open_date'] = localtime(instance.registration_open_date).strftime(
             "%Y-%m-%d %H:%M:%S") if instance.registration_open_date else None
         representation['registration_close_date'] = localtime(instance.registration_close_date).strftime(
@@ -120,10 +120,11 @@ class TournamentSerializer(serializers.ModelSerializer):
         current_time = timezone.localtime(timezone.now())
         if instance.end_date < now():
             current_competition = instance.competitions.last()
+            print(current_competition)
         else:
             current_competition = instance.competitions.filter(
                 is_active=True,
-                end_date__gte=current_time
+                end_date__gte=now()
             ).first()
         is_participated = Participant.objects.filter(competition=current_competition, user=register).first()
         participants = Participant.objects.filter(competition=current_competition)
@@ -133,16 +134,12 @@ class TournamentSerializer(serializers.ModelSerializer):
         representation['category'] = instance.category.name
         representation['tour_id'] = instance.id
 
-        # This is for registration_close_date
         representation['reg_close_date'] = localtime(instance.registration_close_date).strftime("%B %d, %Y at %I:%M %p") if instance.registration_close_date else None
 
-        # This is for registration_open_date
         representation['reg_open_date'] = localtime(instance.registration_open_date).strftime("%B %d, %Y at %I:%M %p") if instance.registration_open_date else None
 
-        # This is for start date
         representation['start_date_formatted'] = localtime(instance.start_date).strftime("%B %d, %Y at %I:%M %p") if instance.start_date else None
 
-        # This is for End date
         representation['end_date_formatted'] = localtime(instance.end_date).strftime("%B %d, %Y at %I:%M %p") if instance.end_date else None
 
         # representation['stage'] = instance.stage.name.name
@@ -154,9 +151,8 @@ class TournamentSerializer(serializers.ModelSerializer):
         representation['is_close'] = instance.end_date < now()
         representation['is_done'] = True if is_participated and ((is_participated.file_uri or (is_participated.video and 'media' in is_participated.video.url)) and is_participated.is_paid) else False
         representation['reg_open'] = current_competition.registration_open_date <= current_time and current_competition.registration_close_date >= current_time
-
         representation['reg_close'] = current_competition.registration_close_date < now()
-        representation['remaining_slots'] = instance.max_participants - participants.count()
+        representation['remaining_slots'] = instance.max_participants - participants.filter(is_paid=True).count()
         representation['is_paid'] = True if payment else False
         representation['competition'] = current_competition_serailzer.data
         representation['rules'] = instance.rules.split('\n') if instance.rules else instance.rules

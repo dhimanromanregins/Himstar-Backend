@@ -20,7 +20,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
         representation = super().to_representation(instance)
         representation['username'] = instance.user.user.username
-        representation['profile_image'] = instance.user.profile_image.url if instance.user.profile_image else None
+        representation['profile_image'] = instance.user.profile_image_url
         representation['is_like'] = True if is_like else False
         representation['likes'] = likes
         representation['comments'] = comments
@@ -37,7 +37,7 @@ class LikeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['username'] = instance.user.user.username
-        representation['profile_image'] = instance.user.profile_image.url if instance.user.profile_image else None
+        representation['profile_image'] = instance.user.profile_image_url
         return representation
 
 
@@ -50,7 +50,7 @@ class CommentSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['username'] = instance.user.user.username
-        representation['profile_image'] = instance.user.profile_image.url if instance.user.profile_image else None
+        representation['profile_image'] = instance.user.profile_image_url
         return representation
 
 

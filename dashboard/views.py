@@ -312,7 +312,7 @@ class LeaderBoard(APIView):
             response_data.append({
                 'id': index + 1,
                 'username': participant.user.user.username,
-                'profile_picture': participant.user.profile_image.url if participant.user.profile_image else None,
+                'profile_picture': participant.user.profile_image_url,
                 'likes': participant.likes_count,
             })
 

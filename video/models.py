@@ -3,87 +3,51 @@ from django.contrib.auth import get_user_model
 from dashboard.models import Competition, Tournament
 from accounts.models import Register
 import uuid
-# import boto3
-from botocore.exceptions import NoCredentialsError
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from django.core.exceptions import ValidationError
+from django.conf import settings
+from storages.backends.azure_storage import AzureStorage
+from utils.helpers import delete_blob_from_azure, AzureMediaStorage
 
 import os
 User = get_user_model()
-
-
-# AWS S3 configuration
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-AWS_STORAGE_BUCKET_NAME = ''
-AWS_S3_REGION_NAME = ''
-
-# Initialize S3 client
-# s3_client = boto3.client(
-#     's3',
-#     aws_access_key_id=AWS_ACCESS_KEY_ID,
-#     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-#     region_name=AWS_S3_REGION_NAME
-# )
-s3_client = None
 
 def generate_video_filename(instance, filename):
     extension = filename.split('.')[-1]
     return f"videos/{uuid.uuid4()}.{extension}"
 
 class Participant(models.Model):
-    competition = models.ForeignKey(Competition, related_name="participants", on_delete=models.SET_NULL, null=True, blank=True)
-    # tournament = models.ForeignKey(Tournament, related_name="tournaments", on_delete=models.SET_NULL, null=True, blank=True)
+    competition = models.ForeignKey(
+        Competition, related_name="participants", on_delete=models.SET_NULL, null=True, blank=True
+    )
     user = models.ForeignKey(Register, on_delete=models.CASCADE)
-    video = models.FileField(upload_to='competition_participants_videos/', blank=True, null=True)
-    # is_qualified_for_next_round = models.BooleanField(default=False)  # For tracking elimination
-    file_uri = models.CharField(max_length=255, blank=True, null=True)
-    temp_video = models.FileField(upload_to='competition_participants_temp_videos/', blank=True, null=True)
+
+    # Store videos in Azure Blob Storage
+    video = models.FileField( storage=AzureMediaStorage(), upload_to='competition_participants_videos/', blank=True, null=True)
+
+    # Store temp videos in local storage (MEDIA_ROOT)
+    temp_video = models.FileField(upload_to='competition_participants_videos/', blank=True, null=True)
+
+    file_uri = models.CharField(max_length=500, blank=True, null=True)
     is_paid = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     super().save(*args, **kwargs)  # Save the instance first
 
-        # Upload the file to S3
-        # if self.video:
-        #     self.upload_to_s3(self.video, 'competition_participants_videos/')
+    #     # Generate and store the Azure Blob URL for the main video
+    #     if self.video:
+    #         self.file_uri = f"{settings.AZURE_FRONT_DOOR_DOMAIN}/{self.video.name}"
+    #         super().save(update_fields=['file_uri'])
 
-    def upload_to_s3(self, file_field, folder):
-        """
-        Uploads the given file to the S3 bucket and updates the file field with its URL.
-        """
-        try:
-            if str(file_field).startswith(f"https://{AWS_STORAGE_BUCKET_NAME}.s3"):
-                print("File already uploaded to S3. Skipping re-upload.")
-                return
-            file_path = file_field.path  # Local file path
-            s3_key = f"{folder}{os.path.basename(file_path)}"  # Destination path in S3
-            s3_client.upload_file(file_path, AWS_STORAGE_BUCKET_NAME, s3_key)
-
-            # Generate the S3 file URL
-            file_url = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
-
-            # Update the field to store the S3 URL instead of the local file path
-            file_field.delete(save=False)  # Remove the local file
-            self.video = file_url
-            self.file_uri = file_url
-            super().save(update_fields=['video', 'file_uri'])
-            print(f"File successfully uploaded to S3: {file_url}")
-        except FileNotFoundError:
-            print("The file was not found.")
-        except NoCredentialsError:
-            print("AWS credentials not available.")
+    def delete(self, *args, **kwargs):
+        """Delete the file from Azure Blob Storage before deleting the model instance"""
+        print('&&&&&&&&&&&&&&&&&')
+        if self.video:
+            delete_blob_from_azure(self.file_uri)
+        if self.temp_video:
+            delete_blob_from_azure(self.file_uri)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.user.username}"
-
-
-
-
 
 
 class Like(models.Model):

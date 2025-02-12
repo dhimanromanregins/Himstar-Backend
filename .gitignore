@@ -1,0 +1,28 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+myenv/
+
+# Database files
+db.sqlite3
+*.sqlite3
+
+# Media and uploaded files
+media/
+
+# Django migrations
+**/migrations/*.pyc
+
+# VS Code and JetBrains IDEs
+.vscode/
+.idea/
+
+# Logs and environment variables
+logs/
+*.log
+.env

@@ -16,8 +16,14 @@ from django.views.decorators.csrf import csrf_exempt
 from payments.models import PaymentDetails
 from video.models import Participant
 from wallet.models import ReferrelPaymentHistory
+import os
 
-
+MEDIA_FOLDERS = [
+    "competition_participants_temp_videos",
+    "competition_participants_videos",
+    "merged_videos",
+    "temp_videos"
+]
 
 
 class PaymentCreateGetAPIView(APIView):
@@ -40,9 +46,27 @@ class PaymentCreateGetAPIView(APIView):
             #     return Response({'message': 'You are not registered for this competition'}, status=status.HTTP_400_BAD_REQUEST)
 
             participant.is_paid = True
+            
             if participant.temp_video:
                 participant.video = participant.temp_video
+                print(participant.temp_video, "Deleting video from all locations...")
+                video_filename = os.path.basename(str(participant.temp_video)) 
+                # video_filename.split('_')
+                # video_filename = video_filename.split('_')[0]
+
+                for folder in MEDIA_FOLDERS:
+                    folder_path = os.path.join("media", folder)  # Get full folder path
+                    
+                    if os.path.exists(folder_path):  # Check if the folder exists
+                        for file in os.listdir(folder_path):  # Iterate through files in the folder
+                            if request.user.username in file:  # Check if video_filename is a substring
+                                file_path = os.path.join(folder_path, file)
+                                os.remove(file_path)  # Delete the file
+                                print(f"Deleted: {file_path}")
+                            else:
+                                print(f"Not matched:")
                 participant.temp_video = None
+                participant.save(update_fields=['temp_video'])
             participant.save()
             payment = PaymentDetails.objects.filter(txnid=request.data.get('txnid'), user=register).first()
             payment.participant = participant
@@ -68,8 +92,6 @@ class PaymentCreateGetAPIView(APIView):
         payments = PaymentDetails.objects.filter(user=user)
         payments_serializer = PaymentSerializer(payments, many=True)
         return Response(payments_serializer.data, status=status.HTTP_200_OK)
-    
-
     
 @csrf_exempt
 def successview(request):

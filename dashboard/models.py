@@ -4,27 +4,14 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from ckeditor.fields import RichTextField
 # import boto3
+from django.conf import settings
 from botocore.exceptions import NoCredentialsError
 import os
 from levels.models import Stage
 import uuid
 from django.core.exceptions import ValidationError
+from utils.helpers import AzureMediaStorage, delete_blob_from_azure
 
-
-# AWS S3 configuration
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-AWS_STORAGE_BUCKET_NAME = ''
-AWS_S3_REGION_NAME = ''
-
-# Initialize S3 client
-# s3_client = boto3.client(
-#     's3',
-#     aws_access_key_id=AWS_ACCESS_KEY_ID,
-#     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-#     region_name=AWS_S3_REGION_NAME
-# )
-s3_client = None
 
 
 
@@ -73,7 +60,7 @@ class Competition(models.Model):
     price = models.BigIntegerField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     # is_online = models.BooleanField(default=False)
-    banner_image = models.ImageField(upload_to='competition_banners/', blank=True, null=True)
+    banner_image = models.ImageField(storage=AzureMediaStorage(),upload_to='competition_banners/', blank=True, null=True)
     file_uri = models.CharField(max_length=255, blank=True, null=True)
     rules = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -92,6 +79,12 @@ class Competition(models.Model):
 
     def __str__(self):
         return self.name
+
+    def delete(self, *args, **kwargs):
+        """Delete the file from Azure Blob Storage before deleting the model instance"""
+        if self.banner_image:
+            delete_blob_from_azure(self.file_uri)
+        super().delete(*args, **kwargs)
     
     def save(self, *args, **kwargs):
         if not self.unique_id:
@@ -99,38 +92,13 @@ class Competition(models.Model):
             while Competition.objects.filter(unique_id=unique_id).exists():
                 unique_id = f"COMP{uuid.uuid4().hex[:8].upper()}"
             self.unique_id = unique_id
-        super().save(*args, **kwargs)
 
-        # Upload the file to S3
-        # self.upload_to_s3(self.banner_image, 'competition_banners/')
+        super().save(*args, **kwargs)  # Save the instance first
 
-    def upload_to_s3(self, file_field, folder):
-        """
-        Uploads the given file to the S3 bucket and updates the file field with its URL.
-        """
-        try:
-            if str(file_field).startswith(f"https://{AWS_STORAGE_BUCKET_NAME}.s3"):
-                print("File already uploaded to S3. Skipping re-upload.")
-                return
-            file_path = file_field.path  # Local file path
-            s3_key = f"{folder}{os.path.basename(file_path)}"  # Destination path in S3
-            s3_client.upload_file(file_path, AWS_STORAGE_BUCKET_NAME, s3_key)
-
-            # Generate the S3 file URL
-            file_url = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
-
-            # Update the field to store the S3 URL instead of the local file path
-            file_field.delete(save=False)  # Remove the local file
-            self.banner_image = file_url
-            self.file_uri = file_url
-            super().save(update_fields=['banner_image', 'file_uri'])
-            print(f"File successfully uploaded to S3: {file_url}")
-        except FileNotFoundError:
-            print("The file was not found.")
-        except NoCredentialsError:
-            print("AWS credentials not available.")
-        except ValueError:
-            print("The file was not assosiated.")
+        # Store the Azure Blob URL in `file_uri`
+        if self.banner_image:
+            self.file_uri = f"{settings.AZURE_FRONT_DOOR_DOMAIN}/{self.banner_image.name}"
+            super().save(update_fields=['file_uri'])
 
     @property
     def is_tournament(self):
@@ -154,7 +122,7 @@ class Tournament(models.Model):
     registration_close_date = models.DateTimeField(null=True, blank=True)
     max_participants = models.PositiveIntegerField(null=True, blank=True)
     stage = models.ForeignKey(Stage, on_delete=models.SET_NULL, null=True, blank=True)
-    banner_image = models.ImageField(upload_to='tournament_banners/', blank=True, null=True)
+    banner_image = models.ImageField(storage=AzureMediaStorage(),upload_to='tournament_banners/', blank=True, null=True)
     file_uri = models.CharField(max_length=255, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     rules = models.TextField(blank=True, null=True)
@@ -173,36 +141,17 @@ class Tournament(models.Model):
                 unique_id = f"TOUR{uuid.uuid4().hex[:8].upper()}"
             self.unique_id = unique_id
         super().save(*args, **kwargs)
+        if self.banner_image:
+            self.file_uri = f"{settings.AZURE_FRONT_DOOR_DOMAIN}/{self.banner_image.name}"
+            super().save(update_fields=['file_uri'])
 
-        # Upload the file to S3
-        # self.upload_to_s3(self.banner_image, 'tournament_banners/')
+    def delete(self, *args, **kwargs):
+        """Delete the file from Azure Blob Storage before deleting the model instance"""
+        if self.banner_image:
+            delete_blob_from_azure(self.file_uri)
+        super().delete(*args, **kwargs)
 
-    def upload_to_s3(self, file_field, folder):
-        """
-        Uploads the given file to the S3 bucket and updates the file field with its URL.
-        """
-        try:
-            if str(file_field).startswith(f"https://{AWS_STORAGE_BUCKET_NAME}.s3"):
-                print("File already uploaded to S3. Skipping re-upload.")
-                return
 
-            file_path = file_field.path  # Local file path
-            s3_key = f"{folder}{os.path.basename(file_path)}"  # Destination path in S3
-            s3_client.upload_file(file_path, AWS_STORAGE_BUCKET_NAME, s3_key)
-
-            # Generate the S3 file URL
-            file_url = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
-
-            # Update the field to store the S3 URL instead of the local file path
-            file_field.delete(save=False)  # Remove the local file
-            self.banner_image = file_url
-            self.file_uri = file_url
-            super().save(update_fields=['banner_image', 'file_uri'])
-            print(f"File successfully uploaded to S3: {file_url}")
-        except FileNotFoundError:
-            print("The file was not found.")
-        except NoCredentialsError:
-            print("AWS credentials not available.")
 
 
 
@@ -222,7 +171,6 @@ class Round(models.Model):
         total_participants = self.competition.participants.count()
         num_to_eliminate = (total_participants * self.eliminated_percentage) // 100
         participants_to_eliminate = self.competition.participants.all()[:num_to_eliminate]  # Just an example elimination strategy
-
         for participant in participants_to_eliminate:
             participant.is_qualified_for_next_round = False
             participant.save()
