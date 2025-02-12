@@ -36,7 +36,4 @@ urlpatterns = [
     path('api/', include('payments.urls')),
     path('api/', include('contact.urls')),
     path('api/', include('wallet.urls'))
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
