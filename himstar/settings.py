@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,26 +90,26 @@ REST_FRAMEWORK = {
     ),
 }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres',
-#         'USER': 'HimstarDB',
-#         'PASSWORD': 'Database@2025',
-#         'HOST': 'himstardbserver.postgres.database.azure.com',
-#         'PORT': '5432',
-#         # 'OPTIONS': {
-#         #     'sslmode': 'require',
-#         # }
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("DB_NAME", "postgres"),
+        'USER': os.getenv("DB_USER", "postgres"),
+        'PASSWORD': os.getenv("DB_PASSWORD", ""),
+        'HOST': os.getenv("DB_HOST", "localhost"),
+        'PORT': os.getenv("DB_PORT", "5432"),
+        # 'OPTIONS': {
+        #     'sslmode': 'require',
+        # }
+    }
+}
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
@@ -165,8 +168,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "dhimansahil.ameotech@gmail.com"
-EMAIL_HOST_PASSWORD = "tevz dzxm xemy bpob"
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -177,9 +180,9 @@ CELERY_TIMEZONE = 'UTC'
 
 
 # Azure Details
-AZURE_ACCOUNT_NAME = "himstarstorage"
-AZURE_CONTAINER = "himstarmedia"
-AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=himstarstorage;AccountKey=VrLZLMLKBwLcJxzB89RKJR973RNt9F8Bv3Z2WPWYjkoG/6mLkkUbQrWjMWXX78ae5enZjp2pZcek+ASt+Srxow==;EndpointSuffix=core.windows.net"
+AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
+AZURE_CONTAINER = os.environ.get('AZURE_CONTAINER')
+AZURE_CONNECTION_STRING = os.environ.get('AZURE_CONNECTION_STRING')
 
 # DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 AZURE_CUSTOM_DOMAIN = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}"
